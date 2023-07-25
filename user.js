@@ -393,6 +393,9 @@ user_pref("image.jxl.enabled", true);
 // [3] https://old.reddit.com/r/firefox/comments/107fj69/how_can_i_disable_the_efficiency_mode_on_firefox/
 user_pref("dom.ipc.processPriorityManager.backgroundUsesEcoQoS", false);
 
+// Compact mode enabled
+user_pref("browser.uidensity", 1);
+
 /****************************************************************************
  * END: BETTERFOX                                                           *
  ****************************************************************************/
