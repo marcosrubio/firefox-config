@@ -12,11 +12,11 @@
  * "Ad meliora"                                                             *
  * version: 115                                                             *
  * url: https://github.com/yokoffing/Betterfox                              *
-****************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * SECTION: FASTFOX                                                         *
-****************************************************************************/
+ ****************************************************************************/
 user_pref("nglayout.initialpaint.delay", 0);
 user_pref("nglayout.initialpaint.delay_in_oopif", 0);
 user_pref("content.notify.interval", 100000);
@@ -56,7 +56,7 @@ user_pref("network.ssl_tokens_cache_capacity", 32768);
 
 /****************************************************************************
  * SECTION: SECUREFOX                                                       *
-****************************************************************************/
+ ****************************************************************************/
 /** TRACKING PROTECTION ***/
 user_pref("browser.contentblocking.category", "strict");
 user_pref("urlclassifier.trackingSkipURLs", "*.reddit.com, *.twitter.com, *.twimg.com, *.tiktok.com");
@@ -189,7 +189,7 @@ user_pref("browser.newtabpage.activity-stream.telemetry", false);
 
 /****************************************************************************
  * SECTION: PESKYFOX                                                        *
-****************************************************************************/
+ ****************************************************************************/
 /** MOZILLA UI ***/
 user_pref("layout.css.prefers-color-scheme.content-override", 2);
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
@@ -245,15 +245,154 @@ user_pref("cookiebanners.service.mode.privateBrowsing", 2);
 
 /****************************************************************************
  * SECTION: SMOOTHFOX                                                       *
-****************************************************************************/
+ ****************************************************************************/
 // visit https://github.com/yokoffing/Betterfox/blob/master/Smoothfox.js
 // Enter your scrolling prefs below this line:
 
 /****************************************************************************
  * START: MY OVERRIDES                                                      *
-****************************************************************************/
+ ****************************************************************************/
 // Enter your personal prefs below this line:
+user_pref("identity.fxaccounts.enabled", true);
+user_pref("gfx.webrender.super-resolution.nvidia", false);
+
+// PREF: increase network predictions
+user_pref("network.http.speculative-parallel-limit", 18); // default=6; overrides SecureFox
+user_pref("network.dns.disablePrefetch", false); // overrides SecureFox
+user_pref("network.dns.disablePrefetchFromHTTPS", false);
+user_pref("network.early-hints.enabled", true);
+user_pref("network.early-hints.preconnect.enabled", true);
+user_pref("network.early-hints.preconnect.max_connections", 20); // FF113
+user_pref("browser.urlbar.speculativeConnect.enabled", true); // overrides SecureFox
+user_pref("browser.places.speculativeConnect.enabled", true); // overrides SecureFox
+user_pref("network.prefetch-next", true); // overrides SecureFox
+user_pref("network.predictor.enabled", true); // overrides SecureFox
+user_pref("network.predictor.enable-prefetch", true); // overrides SecureFox
+user_pref("network.predictor.enable-hover-on-ssl", true);
+user_pref("network.predictor.preresolve-min-confidence", 40); // default=60; alt=10
+user_pref("network.predictor.preconnect-min-confidence", 60); // default=90; alt=20
+user_pref("network.predictor.prefetch-min-confidence", 80); // default=100; alt=30
+user_pref("network.predictor.prefetch-force-valid-for", 3600); // default=10
+user_pref("network.predictor.prefetch-rolling-load-count", 120); // default=10
+user_pref("network.predictor.max-resources-per-entry", 250); // default=100
+user_pref("network.predictor.max-uri-length", 1000); // default=500|
+
+// PREF: lower the priority of network loads for resources on the tracking protection list [NIGHTLY]
+// [NOTE] Applicable because we allow for some social embeds
+// [1] https://github.com/arkenfox/user.js/issues/102#issuecomment-298413904
+user_pref("privacy.trackingprotection.lower_network_priority", true);
+
+// PREF: increase media cache limits
+// For higher-end PCs; helps with video playback/buffering
+// [1] https://github.com/arkenfox/user.js/pull/941
+user_pref("browser.cache.memory.capacity", 1024000); // -1; 256000=256MB, 512000=512MB, 1024000=1GB
+user_pref("media.memory_cache_max_size", 512000); // 65536
+user_pref("media.memory_caches_combined_limit_kb", 2560000); // 524288
+user_pref("media.memory_caches_combined_limit_pc_sysmem", 10); // default=5
+user_pref("media.cache_size", 2048000); // 512000
+user_pref("media.cache_readahead_limit", 99999); // 60
+user_pref("media.cache_resume_threshold", 99999); // 30
+
+// PREF: Preconnect to the autocomplete URL in the address bar
+// Firefox preloads URLs that autocomplete when a user types into the address bar.
+// Connects to destination server ahead of time, to avoid TCP handshake latency.
+// [NOTE] Firefox will perform DNS lookup (if enabled) and TCP and TLS handshake,
+// but will not start sending or receiving HTTP data.
+// [1] https://www.ghacks.net/2017/07/24/disable-preloading-firefox-autocomplete-urls/
+user_pref("browser.urlbar.speculativeConnect.enabled", true);
+
+// PREF: disable mousedown speculative connections on bookmarks and history
+user_pref("browser.places.speculativeConnect.enabled", true);
+
+// PREF: disable automatic authentication on Microsoft sites [WINDOWS]
+// [1] https://bugzilla.mozilla.org/buglist.cgi?bug_id=1695693,1719301
+user_pref("network.http.windows-sso.enabled", false);
+
+// PREF: disable all DRM content (EME: Encryption Media Extension)
+// EME is a JavaScript API for playing DRMed (not free) video content in HTML.
+// A DRM component called a Content Decryption Module (CDM) decrypts, decodes, and displays the video.
+// e.g. Netflix, Amazon Prime, Hulu, HBO, Disney+, Showtime, Starz, DirectTV
+// [SETTING] General>DRM Content>Play DRM-controlled content
+// [TEST] https://bitmovin.com/demos/drm
+// [1] https://www.eff.org/deeplinks/2017/10/drms-dead-canary-how-we-just-lost-web-what-we-learned-it-and-what-we-need-do-next
+// [2] https://old.reddit.com/r/firefox/comments/10gvplf/comment/j55htc7
+user_pref("media.eme.enabled", false); // Fuck DRM
+
+// PREF: number of usages of the web console
+// If this is less than 5, then pasting code into the web console is disabled
+user_pref("devtools.selfxss.count", 9999); // https://www.youtube.com/watch?v=OgIRAjnnJzI
+
+// PREF: disable Push Notifications API [FF44+]
+// Push is an API that allows websites to send you (subscribed) messages even when the site
+// isn't loaded, by pushing messages to your userAgentID through Mozilla's Push Server.
+// You shouldn't need to disable this.
+// [WHY] Push requires subscription
+// [NOTE] To remove all subscriptions, reset "dom.push.userAgentID"
+// [1] https://support.mozilla.org/en-US/kb/push-notifications-firefox
+// [2] https://developer.mozilla.org/en-US/docs/Web/API/Push_API
+// [3] https://www.reddit.com/r/firefox/comments/fbyzd4/the_most_private_browser_isnot_firefox/
+user_pref("dom.push.enabled", false);
+user_pref("dom.push.userAgentID", "");
+
+// recommended for 120hz+ displays
+// largely matches Chrome flags: Windows Scrolling Personality and Smooth Scrolling
+// from https://github.com/AveYo/fox/blob/cf56d1194f4e5958169f9cf335cd175daa48d349/Natural%20Smooth%20Scrolling%20for%20user.js
+user_pref("general.smoothScroll", true); // DEFAULT
+user_pref("general.smoothScroll.msdPhysics.continuousMotionMaxDeltaMS", 12);
+user_pref("general.smoothScroll.msdPhysics.enabled", true);
+user_pref("general.smoothScroll.msdPhysics.motionBeginSpringConstant", 600);
+user_pref("general.smoothScroll.msdPhysics.regularSpringConstant", 650);
+user_pref("general.smoothScroll.msdPhysics.slowdownMinDeltaMS", 25);
+user_pref("general.smoothScroll.msdPhysics.slowdownMinDeltaRatio", 2.0);
+user_pref("general.smoothScroll.msdPhysics.slowdownSpringConstant", 250);
+user_pref("general.smoothScroll.currentVelocityWeighting", 1.0);
+user_pref("general.smoothScroll.stopDecelerationWeighting", 1.0);
+user_pref("mousewheel.default.delta_multiplier_y", 300); // 250-400
+
+// PREF: smoother font
+// [1] https://old.reddit.com/r/firefox/comments/wvs04y/windows_11_firefox_v104_font_rendering_different/?context=3
+user_pref("gfx.webrender.quality.force-subpixel-aa-where-possible", true);
+
+// PREF: use DirectWrite everywhere like Chrome [WINDOWS]
+// [1] https://kb.mozillazine.org/Thunderbird_6.0,_etc.#Font_rendering_and_performance_issues
+// [2] https://old.reddit.com/r/firefox/comments/wvs04y/comment/ilklzy1/?context=3
+user_pref("gfx.font_rendering.cleartype_params.rendering_mode", 5);
+user_pref("gfx.font_rendering.cleartype_params.cleartype_level", 100);
+user_pref(
+  "gfx.font_rendering.cleartype_params.force_gdi_classic_for_families",
+  ""
+);
+user_pref("gfx.font_rendering.cleartype_params.force_gdi_classic_max_size", 6);
+user_pref("gfx.font_rendering.directwrite.use_gdi_table_loading", false);
+
+// PREF: use macOS Appearance Panel text smoothing setting when rendering text [macOS]
+user_pref("gfx.use_text_smoothing_setting", true);
+
+// PREF: URL bar suggestions (bookmarks, history, open tabs) / dropdown options in the URL bar
+user_pref("browser.urlbar.suggest.bookmarks", true);
+user_pref("browser.urlbar.suggest.history", true);
+user_pref("browser.urlbar.suggest.openpage", true);
+
+// PREF: Enforce user interaction for security by always asking where to download
+// [SETTING] General>Downloads>Always ask you where to save files
+// false=the user is asked what to do
+user_pref("browser.download.useDownloadDir", true);
+
+// PREF: Disable Reader mode
+// Firefox will not have to parse webpage for Reader when navigating.
+// Minimal performance impact.
+user_pref("reader.parse-on-load.enabled", false);
+
+// PREF: JPEG XL image format [NIGHTLY]
+// [1] https://cloudinary.com/blog/the-case-for-jpeg-xl
+user_pref("image.jxl.enabled", true);
+
+// PREF: disable efficiency mode [WINDOWS]
+// [1] https://bugzilla.mozilla.org/show_bug.cgi?id=1796525
+// [2] https://bugzilla.mozilla.org/show_bug.cgi?id=1800412
+// [3] https://old.reddit.com/r/firefox/comments/107fj69/how_can_i_disable_the_efficiency_mode_on_firefox/
+user_pref("dom.ipc.processPriorityManager.backgroundUsesEcoQoS", false);
 
 /****************************************************************************
  * END: BETTERFOX                                                           *
-****************************************************************************/
+ ****************************************************************************/
